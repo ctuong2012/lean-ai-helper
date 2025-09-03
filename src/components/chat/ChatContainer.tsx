@@ -10,7 +10,11 @@ interface Message {
   timestamp: Date;
 }
 
-export const ChatContainer = () => {
+interface ChatContainerProps {
+  isWidget?: boolean;
+}
+
+export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -70,14 +74,16 @@ export const ChatContainer = () => {
   };
 
   return (
-    <Card className="flex flex-col h-full max-h-[600px] shadow-soft">
-      {/* Header */}
-      <div className="p-4 border-b border-border bg-gradient-subtle rounded-t-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-          <h2 className="font-semibold text-foreground">AI Assistant</h2>
+    <div className={`flex flex-col h-full ${isWidget ? '' : 'max-h-[600px]'} ${isWidget ? '' : 'shadow-soft rounded-lg border border-border bg-background'}`}>
+      {/* Header - only show if not a widget */}
+      {!isWidget && (
+        <div className="p-4 border-b border-border bg-gradient-subtle rounded-t-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+            <h2 className="font-semibold text-foreground">AI Assistant</h2>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-chat-background">
@@ -105,6 +111,6 @@ export const ChatContainer = () => {
 
       {/* Input */}
       <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
-    </Card>
+    </div>
   );
 };
