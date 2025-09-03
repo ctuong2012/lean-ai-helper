@@ -1,10 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { ChatContainer } from "./ChatContainer";
+import { ChatSettings } from "./ChatSettings";
 import { Button } from "@/components/ui/button";
+import { OpenAIService } from "@/services/openai";
 
 export const FloatingChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [apiKey, setApiKey] = useState<string>("");
+
+  useEffect(() => {
+    // Load API key from localStorage on mount
+    const storedApiKey = OpenAIService.getStoredApiKey();
+    if (storedApiKey) {
+      setApiKey(storedApiKey);
+    }
+  }, []);
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
@@ -16,14 +27,20 @@ export const FloatingChatWidget = () => {
               <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
               <h2 className="font-semibold text-foreground">AI Assistant</h2>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-              className="h-8 w-8 hover:bg-background/50"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <ChatSettings 
+                onApiKeyChange={setApiKey} 
+                currentApiKey={apiKey}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+                className="h-8 w-8 hover:bg-background/50"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           <div className="h-[calc(100%-64px)]">
             <ChatContainer isWidget={true} />

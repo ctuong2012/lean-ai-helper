@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
-import { Card } from "@/components/ui/card";
+import { ChatSettings } from "./ChatSettings";
+import { OpenAIService } from "@/services/openai";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
@@ -24,7 +26,9 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -34,17 +38,42 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
     scrollToBottom();
   }, [messages]);
 
-  const simulateAIResponse = (userMessage: string): string => {
-    const responses = [
-      "That's an interesting question! Let me think about that...",
-      "I understand what you're asking. Here's my perspective:",
-      "Great point! I'd be happy to help with that.",
-      "I see what you mean. Let me provide some insight:",
-      "Thanks for sharing that with me. Here's what I think:",
-    ];
-    
-    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-    return `${randomResponse} You mentioned: "${userMessage}". I'm here to assist you with any questions or tasks you might have!`;
+  useEffect(() => {
+    // Load API key from localStorage on mount
+    const storedApiKey = OpenAIService.getStoredApiKey();
+    if (storedApiKey) {
+      setApiKey(storedApiKey);
+    }
+  }, []);
+
+  const getAIResponse = async (userMessage: string): Promise<string> => {
+    if (!apiKey) {
+      return "Please configure your OpenAI API key in settings to get AI responses.";
+    }
+
+    try {
+      const openAI = new OpenAIService(apiKey);
+      const conversationHistory = messages.map(msg => ({
+        role: msg.isUser ? 'user' as const : 'assistant' as const,
+        content: msg.text
+      }));
+      
+      const allMessages = [
+        { role: 'system' as const, content: 'You are a helpful AI assistant. Provide clear, concise, and helpful responses.' },
+        ...conversationHistory,
+        { role: 'user' as const, content: userMessage }
+      ];
+
+      return await openAI.sendMessage(allMessages);
+    } catch (error) {
+      console.error('OpenAI API error:', error);
+      toast({
+        title: "API Error",
+        description: error instanceof Error ? error.message : "Failed to get AI response",
+        variant: "destructive",
+      });
+      return "Sorry, I encountered an error while processing your request. Please check your API key and try again.";
+    }
   };
 
   const handleSendMessage = async (messageText: string) => {
@@ -59,18 +88,22 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
 
-    // Simulate AI response delay
-    setTimeout(() => {
+    // Get AI response
+    try {
+      const responseText = await getAIResponse(messageText);
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: simulateAIResponse(messageText),
+        text: responseText,
         isUser: false,
         timestamp: new Date(),
       };
 
       setMessages(prev => [...prev, aiResponse]);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+    } finally {
       setIsLoading(false);
-    }, 1000 + Math.random() * 1000);
+    }
   };
 
   return (
@@ -78,9 +111,15 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
       {/* Header - only show if not a widget */}
       {!isWidget && (
         <div className="p-4 border-b border-border bg-gradient-subtle rounded-t-lg">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-            <h2 className="font-semibold text-foreground">AI Assistant</h2>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+              <h2 className="font-semibold text-foreground">AI Assistant</h2>
+            </div>
+            <ChatSettings 
+              onApiKeyChange={setApiKey} 
+              currentApiKey={apiKey}
+            />
           </div>
         </div>
       )}
