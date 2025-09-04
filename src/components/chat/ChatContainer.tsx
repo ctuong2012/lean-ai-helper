@@ -54,10 +54,10 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
     // If no API key but we have relevant documents, provide RAG-only response
     if (!apiKey) {
       if (relevantChunks.length > 0) {
-        const context = relevantChunks.join('\n\n---\n\n');
-        return `Based on your uploaded documents:\n\n${context}\n\nNote: For more comprehensive responses, please configure your OpenAI API key in settings.`;
+        const context = relevantChunks.join('\n\n');
+        return context;
       } else {
-        return "I don't have enough information in the uploaded documents to answer your question. Please upload relevant documents or configure your OpenAI API key in settings for general AI assistance.";
+        return "I don't have the information you're looking for in my knowledge base. Please upload relevant documents or configure your OpenAI API key for broader assistance.";
       }
     }
 
