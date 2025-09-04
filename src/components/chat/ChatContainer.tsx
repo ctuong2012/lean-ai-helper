@@ -57,7 +57,7 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
         const context = relevantChunks.join('\n\n');
         return context;
       } else {
-        return "I don't have the information you're looking for in my knowledge base. Please upload relevant documents or configure your OpenAI API key for broader assistance.";
+        return "We don't have the information you're looking for in our knowledge base. Please upload relevant documents or configure your OpenAI API key for broader assistance.";
       }
     }
 

@@ -92,10 +92,14 @@ export class DocumentProcessor {
       });
     });
 
-    return allChunks
+    // Filter out chunks with very low relevance scores (threshold: 0.1)
+    const relevantChunks = allChunks
+      .filter(item => item.score > 0.1)
       .sort((a, b) => b.score - a.score)
       .slice(0, maxChunks)
       .map(item => item.chunk);
+
+    return relevantChunks;
   }
 
   private static calculateRelevanceScore(query: string, chunk: string): number {
