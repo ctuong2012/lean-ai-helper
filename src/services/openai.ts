@@ -19,9 +19,18 @@ export class OpenAIService {
     this.apiKey = apiKey;
   }
 
-  async sendMessage(messages: OpenAIMessage[]): Promise<string> {
+  async sendMessage(messages: OpenAIMessage[], ragContext?: string): Promise<string> {
     if (!this.apiKey) {
       throw new Error('OpenAI API key is required');
+    }
+
+    // If RAG context is provided, modify the system message
+    let finalMessages = [...messages];
+    if (ragContext && finalMessages[0]?.role === 'system') {
+      finalMessages[0] = {
+        ...finalMessages[0],
+        content: `${finalMessages[0].content}\n\nAdditional context from uploaded documents:\n${ragContext}\n\nPlease use this context to provide more accurate and relevant answers when applicable.`
+      };
     }
 
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
@@ -31,8 +40,8 @@ export class OpenAIService {
         'Authorization': `Bearer ${this.apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages,
+        model: 'gpt-4o-mini',
+        messages: finalMessages,
         max_tokens: 1000,
         temperature: 0.7,
       }),

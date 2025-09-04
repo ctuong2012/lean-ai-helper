@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MessageCircle, X } from "lucide-react";
+import { Bot, X } from "lucide-react";
 import { ChatContainer } from "./ChatContainer";
 import { ChatSettings } from "./ChatSettings";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,7 @@ export const FloatingChatWidget = () => {
         {isOpen ? (
           <X className="h-6 w-6" />
         ) : (
-          <MessageCircle className="h-6 w-6" />
+          <Bot className="h-6 w-6" />
         )}
       </Button>
     </div>

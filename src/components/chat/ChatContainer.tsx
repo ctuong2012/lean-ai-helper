@@ -3,6 +3,7 @@ import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { ChatSettings } from "./ChatSettings";
 import { OpenAIService } from "@/services/openai";
+import { DocumentProcessor } from "@/services/documentProcessor";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -53,18 +54,29 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
 
     try {
       const openAI = new OpenAIService(apiKey);
+      
+      // Get relevant context from uploaded documents
+      const relevantChunks = DocumentProcessor.findRelevantChunks(userMessage, 3);
+      const ragContext = relevantChunks.length > 0 
+        ? relevantChunks.join('\n\n---\n\n')
+        : undefined;
+      
       const conversationHistory = messages.map(msg => ({
         role: msg.isUser ? 'user' as const : 'assistant' as const,
         content: msg.text
       }));
       
+      const systemMessage = relevantChunks.length > 0
+        ? 'You are a helpful AI assistant with access to uploaded documents. Use the provided context from the documents to give accurate, relevant answers when applicable. If the question cannot be answered from the context, provide a general helpful response.'
+        : 'You are a helpful AI assistant. Provide clear, concise, and helpful responses.';
+      
       const allMessages = [
-        { role: 'system' as const, content: 'You are a helpful AI assistant. Provide clear, concise, and helpful responses.' },
+        { role: 'system' as const, content: systemMessage },
         ...conversationHistory,
         { role: 'user' as const, content: userMessage }
       ];
 
-      return await openAI.sendMessage(allMessages);
+      return await openAI.sendMessage(allMessages, ragContext);
     } catch (error) {
       console.error('OpenAI API error:', error);
       toast({
