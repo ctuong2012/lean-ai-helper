@@ -48,15 +48,23 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
   }, []);
 
   const getAIResponse = async (userMessage: string): Promise<string> => {
+    // Get relevant context from uploaded documents
+    const relevantChunks = DocumentProcessor.findRelevantChunks(userMessage, 3);
+    
+    // If no API key but we have relevant documents, provide RAG-only response
     if (!apiKey) {
-      return "Please configure your OpenAI API key in settings to get AI responses.";
+      if (relevantChunks.length > 0) {
+        const context = relevantChunks.join('\n\n---\n\n');
+        return `Based on your uploaded documents:\n\n${context}\n\nNote: For more comprehensive responses, please configure your OpenAI API key in settings.`;
+      } else {
+        return "I don't have enough information in the uploaded documents to answer your question. Please upload relevant documents or configure your OpenAI API key in settings for general AI assistance.";
+      }
     }
 
+    // If API key is available, use OpenAI with optional RAG context
     try {
       const openAI = new OpenAIService(apiKey);
       
-      // Get relevant context from uploaded documents
-      const relevantChunks = DocumentProcessor.findRelevantChunks(userMessage, 3);
       const ragContext = relevantChunks.length > 0 
         ? relevantChunks.join('\n\n---\n\n')
         : undefined;
