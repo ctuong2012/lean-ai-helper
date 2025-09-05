@@ -1,7 +1,4 @@
-interface OpenAIMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
+import { BaseAIService, AIMessage } from './baseAI';
 
 interface OpenAIResponse {
   choices: {
@@ -11,15 +8,14 @@ interface OpenAIResponse {
   }[];
 }
 
-export class OpenAIService {
-  private apiKey: string;
+export class OpenAIService extends BaseAIService {
   private baseUrl = 'https://api.openai.com/v1';
 
   constructor(apiKey: string) {
-    this.apiKey = apiKey;
+    super(apiKey);
   }
 
-  async sendMessage(messages: OpenAIMessage[], ragContext?: string): Promise<string> {
+  async sendMessage(messages: AIMessage[], ragContext?: string): Promise<string> {
     if (!this.apiKey) {
       throw new Error('OpenAI API key is required');
     }
