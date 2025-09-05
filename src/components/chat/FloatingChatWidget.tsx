@@ -4,10 +4,12 @@ import { ChatContainer } from "./ChatContainer";
 import { ChatSettings } from "./ChatSettings";
 import { Button } from "@/components/ui/button";
 import { OpenAIService } from "@/services/openai";
+import { AIProvider } from "@/services/baseAI";
 
 export const FloatingChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [apiKey, setApiKey] = useState<string>("");
+  const [aiProvider, setAiProvider] = useState<AIProvider>(AIProvider.OPENAI);
 
   useEffect(() => {
     // Load API key from localStorage on mount
@@ -31,6 +33,8 @@ export const FloatingChatWidget = () => {
               <ChatSettings 
                 onApiKeyChange={setApiKey} 
                 currentApiKey={apiKey}
+                aiProvider={aiProvider}
+                onProviderChange={setAiProvider}
               />
               <Button
                 variant="ghost"

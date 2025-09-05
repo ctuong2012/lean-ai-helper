@@ -4,6 +4,7 @@ import { ChatInput } from "./ChatInput";
 import { ChatSettings } from "./ChatSettings";
 import { OpenAIService } from "@/services/openai";
 import { BaseAIService, AIProvider } from "@/services/baseAI";
+import { LocalLLMService } from "@/services/localLLM";
 import { DocumentProcessor } from "@/services/documentProcessor";
 import { useToast } from "@/hooks/use-toast";
 
@@ -53,19 +54,19 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
     // Get relevant context from uploaded documents
     const relevantChunks = DocumentProcessor.findRelevantChunks(userMessage, 3);
     
-    // If no API key but we have relevant documents, provide RAG-only response
-    if (!apiKey) {
+    // If no API key/config but we have relevant documents, provide RAG-only response
+    if (!hasValidConfig()) {
       if (relevantChunks.length > 0) {
         const context = relevantChunks.join('\n\n');
         return context;
       } else {
-        return "We don't have the information you're looking for in our knowledge base. Please upload relevant documents or configure your OpenAI API key for broader assistance.";
+        return "We don't have the information you're looking for in our knowledge base. Please upload relevant documents or configure an AI provider for broader assistance.";
       }
     }
 
-    // If API key is available, use selected AI provider with optional RAG context
+    // If configuration is available, use selected AI provider with optional RAG context
     try {
-      const aiService = createAIService(aiProvider, apiKey);
+      const aiService = createAIService();
       
       const ragContext = relevantChunks.length > 0 
         ? relevantChunks.join('\n\n---\n\n')
@@ -128,11 +129,22 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
     }
   };
 
-  const createAIService = (provider: AIProvider, apiKey: string): BaseAIService => {
-    switch (provider) {
+  const hasValidConfig = (): boolean => {
+    if (aiProvider === AIProvider.OPENAI) {
+      return !!apiKey;
+    } else if (aiProvider === AIProvider.LOCAL_LLM) {
+      return true; // Local LLM doesn't require API key
+    }
+    return false;
+  };
+
+  const createAIService = (): BaseAIService => {
+    switch (aiProvider) {
       case AIProvider.OPENAI:
         return new OpenAIService(apiKey);
-      // Add more providers here as needed
+      case AIProvider.LOCAL_LLM:
+        const config = LocalLLMService.getStoredConfig();
+        return new LocalLLMService(config.baseUrl, config.model);
       default:
         return new OpenAIService(apiKey);
     }
@@ -151,6 +163,8 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
             <ChatSettings 
               onApiKeyChange={setApiKey} 
               currentApiKey={apiKey}
+              aiProvider={aiProvider}
+              onProviderChange={setAiProvider}
             />
           </div>
         </div>
