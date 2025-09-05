@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Settings, Eye, EyeOff } from "lucide-react";
 import { DocumentUpload } from "./DocumentUpload";
+import { LocalLLMTest } from "./LocalLLMTest";
 import { OpenAIService } from "@/services/openai";
 import { LocalLLMService } from "@/services/localLLM";
 import { AIProvider } from "@/services/baseAI";
@@ -192,9 +193,11 @@ export const ChatSettings = ({ onApiKeyChange, currentApiKey, aiProvider, onProv
                     onChange={(e) => setLocalConfig(prev => ({ ...prev, model: e.target.value }))}
                   />
                   <p className="text-sm text-muted-foreground">
-                    Make sure Ollama is running and the model is downloaded.
+                    Make sure Ollama is running and the model is downloaded. 
+                    <br />Run: <code className="bg-muted px-1 rounded">ollama serve</code> and <code className="bg-muted px-1 rounded">ollama pull {localConfig.model}</code>
                   </p>
                 </div>
+                <LocalLLMTest baseUrl={localConfig.baseUrl} model={localConfig.model} />
                 <div className="flex gap-2">
                   <Button onClick={handleSave} className="flex-1">
                     Save Configuration

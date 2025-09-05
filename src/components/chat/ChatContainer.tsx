@@ -90,12 +90,33 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
       return await aiService.sendMessage(allMessages, ragContext);
     } catch (error) {
       console.error('AI API error:', error);
+      
+      // Handle specific local LLM connection errors
+      if (aiProvider === AIProvider.LOCAL_LLM && error instanceof Error) {
+        if (error.message.includes('Cannot connect to Ollama server')) {
+          // If local LLM fails, fall back to RAG-only if available
+          if (relevantChunks.length > 0) {
+            const context = relevantChunks.join('\n\n');
+            return `I couldn't connect to the local LLM server (Ollama). Here's what I found in the knowledge base:\n\n${context}`;
+          } else {
+            return "I couldn't connect to the local LLM server. Make sure Ollama is running on localhost:11434 and try again. You can also upload documents to use the knowledge base without a local LLM.";
+          }
+        }
+      }
+      
       toast({
-        title: "API Error",
+        title: "AI Error",
         description: error instanceof Error ? error.message : "Failed to get AI response",
         variant: "destructive",
       });
-      return "Sorry, I encountered an error while processing your request. Please check your API key and try again.";
+      
+      // Fall back to RAG-only if available
+      if (relevantChunks.length > 0) {
+        const context = relevantChunks.join('\n\n');
+        return `I encountered an error with the AI service. Here's what I found in the knowledge base:\n\n${context}`;
+      }
+      
+      return "Sorry, I encountered an error while processing your request. Please check your configuration and try again.";
     }
   };
 
