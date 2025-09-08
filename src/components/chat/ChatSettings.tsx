@@ -122,12 +122,12 @@ export const ChatSettings = ({ onApiKeyChange, currentApiKey, aiProvider, onProv
                   <SelectValue placeholder="Select AI Provider" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={AIProvider.OPENAI}>OpenAI</SelectItem>
-                  <SelectItem value={AIProvider.LOCAL_LLM}>Local LLM (Ollama)</SelectItem>
+                  <SelectItem value={AIProvider.LOCAL_LLM}>🏠 Local LLM (Ollama) - Recommended</SelectItem>
+                  <SelectItem value={AIProvider.OPENAI}>☁️ OpenAI</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-sm text-muted-foreground">
-                Choose between cloud-based OpenAI or local Ollama models.
+                Local LLM is recommended for privacy and offline use. Cloud-based OpenAI requires an API key.
               </p>
             </div>
           </TabsContent>

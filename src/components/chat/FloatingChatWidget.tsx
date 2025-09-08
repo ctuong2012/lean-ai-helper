@@ -9,7 +9,7 @@ import { AIProvider } from "@/services/baseAI";
 export const FloatingChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [apiKey, setApiKey] = useState<string>("");
-  const [aiProvider, setAiProvider] = useState<AIProvider>(AIProvider.OPENAI);
+  const [aiProvider, setAiProvider] = useState<AIProvider>(AIProvider.LOCAL_LLM);
 
   useEffect(() => {
     // Load API key from localStorage on mount
