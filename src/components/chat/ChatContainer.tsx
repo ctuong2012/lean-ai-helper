@@ -30,7 +30,7 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [apiKey, setApiKey] = useState<string>("");
-  const [aiProvider, setAiProvider] = useState<AIProvider>(AIProvider.OPENAI);
+  const [aiProvider, setAiProvider] = useState<AIProvider>(AIProvider.LOCAL_LLM);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
