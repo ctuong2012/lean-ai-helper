@@ -54,6 +54,12 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
     // Get relevant context from uploaded documents
     const relevantChunks = DocumentProcessor.findRelevantChunks(userMessage, 3);
     
+    // Debug: Log document usage
+    const storedDocs = DocumentProcessor.getStoredDocuments();
+    console.log('📚 Stored documents:', storedDocs.length);
+    console.log('🔍 Relevant chunks found:', relevantChunks.length);
+    console.log('📝 Chunks content:', relevantChunks);
+    
     // If no API key/config but we have relevant documents, provide RAG-only response
     if (!hasValidConfig()) {
       if (relevantChunks.length > 0) {
