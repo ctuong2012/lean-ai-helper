@@ -81,7 +81,7 @@ export class DocumentProcessor {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filtered));
   }
 
-  static findRelevantChunks(query: string, maxChunks: number = 3): string[] {
+  static findRelevantChunks(query: string, maxChunks: number = 2): string[] {
     const documents = this.getStoredDocuments();
     const allChunks: { chunk: string; score: number }[] = [];
 

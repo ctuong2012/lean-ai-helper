@@ -38,6 +38,11 @@ export class LocalLLMService extends BaseAIService {
           model: this.model,
           messages: finalMessages,
           stream: false,
+          options: {
+            temperature: 0.7,
+            num_ctx: 2048, // Reduce context window for faster response
+            num_predict: 500, // Limit response length
+          }
         }),
       });
 
