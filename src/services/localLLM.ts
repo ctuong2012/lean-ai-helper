@@ -22,7 +22,7 @@ export class LocalLLMService extends BaseAIService {
     if (ragContext && finalMessages[0]?.role === 'system') {
       finalMessages[0] = {
         ...finalMessages[0],
-        content: `${finalMessages[0].content}\n\nAdditional context from uploaded documents:\n${ragContext}\n\nPlease use this context to provide more accurate and relevant answers when applicable.`
+        content: `${finalMessages[0].content}\n\nKNOWLEDGE BASE CONTEXT:\n${ragContext}\n\nIMPORTANT: You must use the information from the KNOWLEDGE BASE CONTEXT above to answer the user's question. Base your response primarily on this context when it's relevant to the question.`
       };
     }
 
