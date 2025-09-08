@@ -26,6 +26,8 @@ export class LocalLLMService extends BaseAIService {
       };
     }
 
+    console.log('Sending to Ollama:', { model: this.model, messages: finalMessages });
+
     try {
       const response = await fetch(`${this.baseUrl}/api/chat`, {
         method: 'POST',
@@ -41,11 +43,20 @@ export class LocalLLMService extends BaseAIService {
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({}));
+        console.error('Ollama server error:', error);
         throw new Error(error.error || `Ollama server error: ${response.status}`);
       }
 
       const data: OllamaResponse = await response.json();
-      return data.message?.content || 'Sorry, I could not generate a response.';
+      console.log('Ollama response:', data);
+      
+      const content = data.message?.content;
+      if (!content || content.trim() === '') {
+        console.warn('Empty response from Ollama');
+        return 'The model provided an empty response. This might be due to the model configuration or the query format.';
+      }
+      
+      return content;
     } catch (error) {
       if (error instanceof Error) {
         if (error.message.includes('fetch')) {
