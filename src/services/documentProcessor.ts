@@ -1,3 +1,5 @@
+import * as mammoth from 'mammoth';
+
 interface ProcessedDocument {
   id: string;
   filename: string;
@@ -28,6 +30,25 @@ export class DocumentProcessor {
   }
 
   private static async extractTextFromFile(file: File): Promise<string> {
+    // Handle DOCX files
+    if (file.name.toLowerCase().endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            const arrayBuffer = e.target?.result as ArrayBuffer;
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            resolve(result.value);
+          } catch (error) {
+            reject(new Error('Failed to extract text from DOCX file'));
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read DOCX file'));
+        reader.readAsArrayBuffer(file);
+      });
+    }
+    
+    // Handle text files
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {

@@ -30,10 +30,13 @@ export const DocumentUpload = ({ onDocumentsChange }: DocumentUploadProps) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('text/')) {
+    const isTextFile = file.type.startsWith('text/');
+    const isDocx = file.name.toLowerCase().endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    
+    if (!isTextFile && !isDocx) {
       toast({
         title: "Invalid file type",
-        description: "Please upload a text file (.txt, .md, etc.)",
+        description: "Please upload a text file (.txt, .md, etc.) or Word document (.docx)",
         variant: "destructive",
       });
       return;
@@ -92,7 +95,7 @@ export const DocumentUpload = ({ onDocumentsChange }: DocumentUploadProps) => {
         <label className="cursor-pointer flex flex-col items-center gap-2 text-center">
           <input
             type="file"
-            accept=".txt,.md,.csv,.json"
+            accept=".txt,.md,.csv,.json,.docx"
             onChange={handleFileUpload}
             className="hidden"
             disabled={isUploading}
@@ -106,7 +109,7 @@ export const DocumentUpload = ({ onDocumentsChange }: DocumentUploadProps) => {
             {isUploading ? "Processing document..." : "Click to upload a document"}
           </div>
           <div className="text-xs text-muted-foreground">
-            Supports .txt, .md, .csv, .json files
+            Supports .txt, .md, .csv, .json, .docx files
           </div>
         </label>
       </Card>
