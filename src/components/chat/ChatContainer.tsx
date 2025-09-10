@@ -31,7 +31,7 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [apiKey, setApiKey] = useState<string>("");
-  const [aiProvider, setAiProvider] = useState<AIProvider>(AIProvider.LOCAL_LLM);
+  const [aiProvider, setAiProvider] = useState<AIProvider>(AIProvider.FREE_LLM_CLOUD);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -76,6 +76,8 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
   };
 
   const getAIResponse = async (userMessage: string): Promise<string> => {
+    console.log('🔧 Current AI Provider:', aiProvider);
+    console.log('🔧 Has valid config:', hasValidConfig());
     // Get relevant context from uploaded documents
     const relevantChunks = DocumentProcessor.findRelevantChunks(userMessage, 3);
     
@@ -97,7 +99,9 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
 
     // If configuration is available, use selected AI provider with optional RAG context
     try {
+      console.log('🔧 Creating AI service for provider:', aiProvider);
       const aiService = createAIService();
+      console.log('🔧 AI Service created:', aiService.constructor.name);
       
       const ragContext = relevantChunks.length > 0 
         ? relevantChunks.join('\n\n---\n\n')
