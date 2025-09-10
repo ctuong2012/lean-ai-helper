@@ -95,7 +95,7 @@ export const ChatSettings = ({ onApiKeyChange, currentApiKey, aiProvider, onProv
       });
     } else if (aiProvider === AIProvider.FREE_LLM_CLOUD) {
       FreeLLMCloudService.clearApiKey();
-      setFreeCloudConfig({ model: 'meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo' });
+      setFreeCloudConfig({ model: 'meta-llama/llama-3.2-3b-instruct:free' });
       toast({
         title: "Configuration Cleared",
         description: "Your Free LLM Cloud configuration has been reset",
@@ -233,13 +233,14 @@ export const ChatSettings = ({ onApiKeyChange, currentApiKey, aiProvider, onProv
                       <SelectValue placeholder="Select model" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo">Llama 3.2 11B Vision (Free)</SelectItem>
-                      <SelectItem value="meta-llama/Llama-3.3-70B-Instruct-Turbo">Llama 3.3 70B (Free)</SelectItem>
-                      <SelectItem value="meta-llama/Llama-3.2-3B-Instruct-Turbo">Llama 3.2 3B (Free)</SelectItem>
+                      <SelectItem value="meta-llama/llama-3.2-3b-instruct:free">Llama 3.2 3B (Free)</SelectItem>
+                      <SelectItem value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (Free)</SelectItem>
+                      <SelectItem value="mistralai/mistral-7b-instruct:free">Mistral 7B (Free)</SelectItem>
+                      <SelectItem value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B (Free)</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-sm text-muted-foreground">
-                    Free access to Llama models via Together AI. No API key required.
+                    Free access to multiple LLM models via OpenRouter. No API key required!
                   </p>
                 </div>
                 <div className="flex gap-2">

@@ -1,6 +1,6 @@
 import { BaseAIService, AIMessage } from './baseAI';
 
-interface TogetherAIResponse {
+interface OpenRouterResponse {
   choices: {
     message: {
       content: string;
@@ -9,10 +9,10 @@ interface TogetherAIResponse {
 }
 
 export class FreeLLMCloudService extends BaseAIService {
-  private baseUrl = 'https://api.together.xyz/v1';
+  private baseUrl = 'https://openrouter.ai/api/v1';
   private model: string;
 
-  constructor(apiKey: string = '', model: string = 'meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo') {
+  constructor(apiKey: string = '', model: string = 'meta-llama/llama-3.2-3b-instruct:free') {
     super(apiKey);
     this.model = model;
   }
@@ -31,7 +31,9 @@ export class FreeLLMCloudService extends BaseAIService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey || 'free'}`,
+        'Authorization': `Bearer ${this.apiKey || 'sk-or-v1-no-key-required'}`,
+        'HTTP-Referer': 'https://your-app.com',
+        'X-Title': 'Free LLM Chat',
       },
       body: JSON.stringify({
         model: this.model,
@@ -44,10 +46,10 @@ export class FreeLLMCloudService extends BaseAIService {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.error?.message || 'Failed to get response from Free LLM Cloud');
+      throw new Error(error.error?.message || 'Failed to get response from OpenRouter Free API');
     }
 
-    const data: TogetherAIResponse = await response.json();
+    const data: OpenRouterResponse = await response.json();
     return data.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
   }
 
@@ -72,7 +74,7 @@ export class FreeLLMCloudService extends BaseAIService {
         // Fall back to default if parsing fails
       }
     }
-    return { model: 'meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo' };
+    return { model: 'meta-llama/llama-3.2-3b-instruct:free' };
   }
 
   static setConfig(model: string): void {
