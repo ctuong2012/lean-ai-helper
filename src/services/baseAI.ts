@@ -22,5 +22,6 @@ export interface AIServiceStatic {
 export enum AIProvider {
   OPENAI = 'openai',
   LOCAL_LLM = 'local-llm',
+  FREE_LLM_CLOUD = 'free-llm-cloud',
   // Add more providers as needed
 }

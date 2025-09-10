@@ -10,6 +10,7 @@ import { DocumentUpload } from "./DocumentUpload";
 import { LocalLLMTest } from "./LocalLLMTest";
 import { OpenAIService } from "@/services/openai";
 import { LocalLLMService } from "@/services/localLLM";
+import { FreeLLMCloudService } from "@/services/freeLLMCloud";
 import { AIProvider } from "@/services/baseAI";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,6 +26,7 @@ export const ChatSettings = ({ onApiKeyChange, currentApiKey, aiProvider, onProv
   const [showApiKey, setShowApiKey] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [localConfig, setLocalConfig] = useState(() => LocalLLMService.getStoredConfig());
+  const [freeCloudConfig, setFreeCloudConfig] = useState(() => FreeLLMCloudService.getStoredConfig());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -65,6 +67,13 @@ export const ChatSettings = ({ onApiKeyChange, currentApiKey, aiProvider, onProv
         title: "Success",
         description: "Local LLM configuration saved successfully",
       });
+    } else if (aiProvider === AIProvider.FREE_LLM_CLOUD) {
+      FreeLLMCloudService.setConfig(freeCloudConfig.model);
+      setIsOpen(false);
+      toast({
+        title: "Success",
+        description: "Free LLM Cloud configuration saved successfully",
+      });
     }
   };
 
@@ -83,6 +92,13 @@ export const ChatSettings = ({ onApiKeyChange, currentApiKey, aiProvider, onProv
       toast({
         title: "Configuration Cleared",
         description: "Your local LLM configuration has been reset",
+      });
+    } else if (aiProvider === AIProvider.FREE_LLM_CLOUD) {
+      FreeLLMCloudService.clearApiKey();
+      setFreeCloudConfig({ model: 'meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo' });
+      toast({
+        title: "Configuration Cleared",
+        description: "Your Free LLM Cloud configuration has been reset",
       });
     }
   };
@@ -124,10 +140,11 @@ export const ChatSettings = ({ onApiKeyChange, currentApiKey, aiProvider, onProv
                 <SelectContent>
                   <SelectItem value={AIProvider.LOCAL_LLM}>🏠 Local LLM (Ollama) - Recommended</SelectItem>
                   <SelectItem value={AIProvider.OPENAI}>☁️ OpenAI</SelectItem>
+                  <SelectItem value={AIProvider.FREE_LLM_CLOUD}>🌐 Free LLM Cloud</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-sm text-muted-foreground">
-                Local LLM is recommended for privacy and offline use. Cloud-based OpenAI requires an API key.
+                Local LLM is recommended for privacy and offline use. Free LLM Cloud offers free access to Llama models. OpenAI requires an API key.
               </p>
             </div>
           </TabsContent>
@@ -173,7 +190,7 @@ export const ChatSettings = ({ onApiKeyChange, currentApiKey, aiProvider, onProv
                   </Button>
                 </div>
               </div>
-            ) : (
+            ) : aiProvider === AIProvider.LOCAL_LLM ? (
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="base-url">Ollama Base URL</Label>
@@ -198,6 +215,33 @@ export const ChatSettings = ({ onApiKeyChange, currentApiKey, aiProvider, onProv
                   </p>
                 </div>
                 <LocalLLMTest baseUrl={localConfig.baseUrl} model={localConfig.model} />
+                <div className="flex gap-2">
+                  <Button onClick={handleSave} className="flex-1">
+                    Save Configuration
+                  </Button>
+                  <Button variant="outline" onClick={handleClear}>
+                    Reset
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="free-model">Model</Label>
+                  <Select value={freeCloudConfig.model} onValueChange={(value) => setFreeCloudConfig(prev => ({ ...prev, model: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo">Llama 3.2 11B Vision (Free)</SelectItem>
+                      <SelectItem value="meta-llama/Llama-3.3-70B-Instruct-Turbo">Llama 3.3 70B (Free)</SelectItem>
+                      <SelectItem value="meta-llama/Llama-3.2-3B-Instruct-Turbo">Llama 3.2 3B (Free)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-muted-foreground">
+                    Free access to Llama models via Together AI. No API key required.
+                  </p>
+                </div>
                 <div className="flex gap-2">
                   <Button onClick={handleSave} className="flex-1">
                     Save Configuration

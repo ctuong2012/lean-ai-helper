@@ -5,6 +5,7 @@ import { ChatSettings } from "./ChatSettings";
 import { OpenAIService } from "@/services/openai";
 import { BaseAIService, AIProvider } from "@/services/baseAI";
 import { LocalLLMService } from "@/services/localLLM";
+import { FreeLLMCloudService } from "@/services/freeLLMCloud";
 import { DocumentProcessor } from "@/services/documentProcessor";
 import { useToast } from "@/hooks/use-toast";
 
@@ -161,6 +162,8 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
       return !!apiKey;
     } else if (aiProvider === AIProvider.LOCAL_LLM) {
       return true; // Local LLM doesn't require API key
+    } else if (aiProvider === AIProvider.FREE_LLM_CLOUD) {
+      return true; // Free LLM Cloud works without API key
     }
     return false;
   };
@@ -172,6 +175,10 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
       case AIProvider.LOCAL_LLM:
         const config = LocalLLMService.getStoredConfig();
         return new LocalLLMService(config.baseUrl, config.model);
+      case AIProvider.FREE_LLM_CLOUD:
+        const freeConfig = FreeLLMCloudService.getStoredConfig();
+        const freeApiKey = FreeLLMCloudService.getStoredApiKey();
+        return new FreeLLMCloudService(freeApiKey || '', freeConfig.model);
       default:
         return new OpenAIService(apiKey);
     }
