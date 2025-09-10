@@ -49,7 +49,31 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
     if (storedApiKey) {
       setApiKey(storedApiKey);
     }
+    
+    // Load stored AI provider
+    const storedProvider = localStorage.getItem('ai-provider') as AIProvider;
+    if (storedProvider && Object.values(AIProvider).includes(storedProvider)) {
+      setAiProvider(storedProvider);
+    }
   }, []);
+
+  
+  const handleProviderChange = (provider: AIProvider) => {
+    setAiProvider(provider);
+    localStorage.setItem('ai-provider', provider);
+    
+    // Clear any provider-specific error states or reload API keys
+    if (provider === AIProvider.OPENAI) {
+      const storedApiKey = OpenAIService.getStoredApiKey();
+      setApiKey(storedApiKey || '');
+    } else if (provider === AIProvider.FREE_LLM_CLOUD) {
+      // Clear any error states for free provider
+      setApiKey('');
+    } else if (provider === AIProvider.LOCAL_LLM) {
+      // Clear any error states for local LLM
+      setApiKey('');
+    }
+  };
 
   const getAIResponse = async (userMessage: string): Promise<string> => {
     // Get relevant context from uploaded documents
@@ -198,7 +222,7 @@ export const ChatContainer = ({ isWidget = false }: ChatContainerProps) => {
               onApiKeyChange={setApiKey} 
               currentApiKey={apiKey}
               aiProvider={aiProvider}
-              onProviderChange={setAiProvider}
+              onProviderChange={handleProviderChange}
             />
           </div>
         </div>
