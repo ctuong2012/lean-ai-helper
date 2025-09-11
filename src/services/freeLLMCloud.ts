@@ -31,8 +31,7 @@ export class FreeLLMCloudService extends BaseAIService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey || 'sk-or-v1-no-key-required'}`,
-        'HTTP-Referer': 'https://your-app.com',
+        'HTTP-Referer': window.location.origin,
         'X-Title': 'Free LLM Chat',
       },
       body: JSON.stringify({
